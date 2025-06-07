@@ -8,11 +8,13 @@ from google.oauth2.service_account import Credentials
 ROLES = ["Top", "Jungle", "Mid", "ADC", "Support"]
 RANK_TIERS = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Emerald", "Diamond", "Master", "Grandmaster", "Challenger"]
 
-# 認証スコープ（読み書き）
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# service_account.json は Streamlit 実行フォルダに置く
-creds = Credentials.from_service_account_file("streamlit-lol-custom-2b83de1a496a.json", scopes=scope)
+gcp_secrets = st.secrets["gcp_service_account"]  # ← secrets.toml or cloud secrets
+creds_dict = dict(gcp_secrets)
+creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+
+creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
 client = gspread.authorize(creds)
 
 # シートを開く（タイトル名で指定）
