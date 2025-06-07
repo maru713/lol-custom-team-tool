@@ -35,10 +35,15 @@ def load_players_from_sheet():
     return players
 
 def save_players_to_sheet(players):
-    header = ["name"] + [f"{role}_priority" for role in ROLES] + [f"{role}_tier" for role in ROLES] + [f"{role}_division" for role in ROLES] + ["win", "total"]
-    values = [header]
+    existing_rows = sheet.get_all_records()
+    header = sheet.row_values(1)
+
+    # name -> row index（2行目以降） のマップ
+    name_to_row = {row["name"]: idx + 2 for idx, row in enumerate(existing_rows)}
+
     for p in players:
-        row = [p["name"]]
+        name = p["name"]
+        row = [name]
         for role in ROLES:
             row.append(p["role_priorities"].get(role, 0))
         for role in ROLES:
@@ -46,13 +51,21 @@ def save_players_to_sheet(players):
             row.append(rank.get("tier", "Silver"))
         for role in ROLES:
             row.append(rank.get("division", 4))
-        win_data = st.session_state.player_wins.get(p["name"], {"win": 0, "total": 0})
+
+        win_data = st.session_state.player_wins.get(name, {"win": 0, "total": 0})
         row.append(win_data["win"])
         row.append(win_data["total"])
-        values.append(row)
-    sheet.clear()
-    sheet.update("A1", values)
 
+        if name in name_to_row:
+            # 上書き
+            sheet.update(f"A{name_to_row[name]}", [row])
+        else:
+            # 末尾追加
+            sheet.append_row(row)
+
+    # 必要ならヘッダーも初回だけ更新
+    if header != ["name"] + [f"{role}_priority" for role in ROLES] + [f"{role}_tier" for role in ROLES] + [f"{role}_division" for role in ROLES] + ["win", "total"]:
+        sheet.update("A1", [["name"] + [f"{role}_priority" for role in ROLES] + [f"{role}_tier" for role in ROLES] + [f"{role}_division" for role in ROLES] + ["win", "total"]])
 st.set_page_config(page_title="LoLカスタムチーム分け", layout="wide")
 
 # ティア＋ディビジョンをスコアに変換（Iron4 = 0, Iron1 = 3, Bronze4 = 4, ..., Challenger = 39）
