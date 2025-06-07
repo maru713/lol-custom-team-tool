@@ -323,6 +323,7 @@ if len(selected_names) == 10 and st.button("チーム分け実行"):
     if result:
         t1, t2 = result
         t1, t2, matchup_gap = optimize_matchup_gap(t1, t2)
+        st.session_state.last_teams = (t1, t2)
 
         st.markdown("### 🟥 チーム1")
         for p, role in t1:
@@ -331,7 +332,6 @@ if len(selected_names) == 10 and st.button("チーム分け実行"):
         st.markdown("### 🟦 チーム2")
         for p, role in t2:
             st.write(format_player_label(p, role))
-
 
         st.success("ロールとランクのバランスを最も近づけたチーム分けを表示しています。")
 
@@ -349,4 +349,3 @@ if len(selected_names) == 10 and st.button("チーム分け実行"):
 
     else:
         st.error("有効なロール割り当てが見つかりませんでした。")
-    st.session_state.last_teams = (t1, t2)
