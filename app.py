@@ -35,7 +35,7 @@ def load_players_from_sheet():
     return players
 
 def save_players_to_sheet(players):
-    header = ["name"] + [f"{role}_priority" for role in ROLES] + [f"{role}_tier" for role in ROLES] + [f"{role}_division" for role in ROLES]
+    header = ["name"] + [f"{role}_priority" for role in ROLES] + [f"{role}_tier" for role in ROLES] + [f"{role}_division" for role in ROLES] + ["win", "total"]
     values = [header]
     for p in players:
         row = [p["name"]]
@@ -46,8 +46,10 @@ def save_players_to_sheet(players):
             row.append(rank.get("tier", "Silver"))
         for role in ROLES:
             row.append(rank.get("division", 4))
+        win_data = st.session_state.player_wins.get(p["name"], {"win": 0, "total": 0})
+        row.append(win_data["win"])
+        row.append(win_data["total"])
         values.append(row)
-    
     sheet.clear()
     sheet.update("A1", values)
 
@@ -142,7 +144,6 @@ if st.button("保存"):
         st.session_state.players_data.append(player_data)
         st.success(f"{player_data['name']} を追加しました")
         save_players_to_sheet(st.session_state.players_data)
-
     else:
         for i, p in enumerate(st.session_state.players_data):
             if p["name"] == selected_player:
@@ -320,6 +321,7 @@ if st.session_state.get("confirmed_teams") and st.session_state.get("last_teams"
             st.session_state.player_wins[name]["total"] += 1
 
         st.success(f"{winner} の勝利を記録しました")
+        save_players_to_sheet(st.session_state.players_data)
         st.session_state.confirmed_teams = None  # リセット
 elif st.session_state.get("last_teams"):
     if st.button("チームを確定"):
