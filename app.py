@@ -287,14 +287,33 @@ def format_player_label(p, role):
     else:
         label += "　勝率: N/A"
     return label
-if st.session_state.get("confirmed_teams"):
+if st.session_state.get("confirmed_teams") and st.session_state.get("last_teams"):
     st.markdown("### ✅ チーム確定済み")
 
     winner = st.radio("勝ったチームは？", options=["🟥 チーム1", "🟦 チーム2"], key="winner_select")
     if st.button("結果を記録"):
-        st.success(f"{winner} の勝利を記録しました（※記録保存機能はまだ未実装）")
+        t1, t2 = st.session_state.get("confirmed_teams", ([], []))
+        if winner == "🟥 チーム1":
+            winners, losers = t1, t2
+        else:
+            winners, losers = t2, t1
+
+        for p, _ in winners:
+            name = p["name"]
+            if name not in st.session_state.player_wins:
+                st.session_state.player_wins[name] = {"win": 0, "total": 0}
+            st.session_state.player_wins[name]["win"] += 1
+            st.session_state.player_wins[name]["total"] += 1
+
+        for p, _ in losers:
+            name = p["name"]
+            if name not in st.session_state.player_wins:
+                st.session_state.player_wins[name] = {"win": 0, "total": 0}
+            st.session_state.player_wins[name]["total"] += 1
+
+        st.success(f"{winner} の勝利を記録しました")
         st.session_state.confirmed_teams = None  # リセット
-else:
+elif st.session_state.get("last_teams"):
     if st.button("チームを確定"):
         st.session_state.confirmed_teams = st.session_state.get("last_teams", None)
         st.success("このチーム構成を確定しました")
