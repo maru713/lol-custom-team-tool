@@ -19,6 +19,8 @@ client = gspread.authorize(creds)
 
 # シートを開く（タイトル名で指定）
 sheet = client.open("LoL_Custom_Teams").sheet1
+if "confirmed_teams" not in st.session_state:
+    st.session_state.confirmed_teams = None
 def load_players_from_sheet():
     raw_rows = sheet.get_all_records()
     players = []
@@ -285,7 +287,17 @@ def format_player_label(p, role):
     else:
         label += "　勝率: N/A"
     return label
+if st.session_state.get("confirmed_teams"):
+    st.markdown("### ✅ チーム確定済み")
 
+    winner = st.radio("勝ったチームは？", options=["🟥 チーム1", "🟦 チーム2"], key="winner_select")
+    if st.button("結果を記録"):
+        st.success(f"{winner} の勝利を記録しました（※記録保存機能はまだ未実装）")
+        st.session_state.confirmed_teams = None  # リセット
+else:
+    if st.button("チームを確定"):
+        st.session_state.confirmed_teams = st.session_state.get("last_teams", None)
+        st.success("このチーム構成を確定しました")
 if len(selected_names) == 10 and st.button("チーム分け実行"):
     selected_players = [p for p in st.session_state.players_data if p['name'] in selected_names]
     result = find_best_balance(selected_players)
@@ -318,4 +330,4 @@ if len(selected_names) == 10 and st.button("チーム分け実行"):
 
     else:
         st.error("有効なロール割り当てが見つかりませんでした。")
-
+    st.session_state.last_teams = (t1, t2)
