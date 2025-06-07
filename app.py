@@ -141,10 +141,20 @@ else:
 
 # 入力フォーム
 player_data["name"] = st.text_input("名前", value=player_data["name"])
+priority_options = [
+    ("❌ 絶対やりたくない", -1),
+    ("0: どちらでもいい", 0),
+    ("1: やややりたい", 1),
+    ("2: やりたい", 2),
+    ("3: 優先したい", 3),
+    ("4: 最優先", 4),
+]
 for role in ROLES:
     player_data["role_priorities"][role] = st.selectbox(
-        f"{role}の希望度", [-1, 0, 1, 2, 3, 4], index=[-1, 0, 1, 2, 3, 4].index(player_data["role_priorities"].get(role, 0))
-    )
+        f"{role}の希望度", priority_options,
+        index=[opt[1] for opt in priority_options].index(player_data["role_priorities"].get(role, 0)),
+        format_func=lambda x: x[0]
+    )[1]
     tier = st.selectbox(f"{role}のティア", RANK_TIERS, index=RANK_TIERS.index(player_data["ranks"][role]["tier"]))
     division = None
     if tier in RANK_TIERS[:7]:
