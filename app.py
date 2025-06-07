@@ -315,17 +315,17 @@ if st.session_state.get("confirmed_teams") and st.session_state.get("last_teams"
     st.markdown("### ✅ チーム確定済み")
 
     t1, t2 = st.session_state.confirmed_teams
-    st.markdown("### 🟥 チーム1（確定）")
+    st.markdown("### 🟦 チーム1（確定）")
     for p, role in t1:
         st.write(format_player_label(p, role))
-    st.markdown("### 🟦 チーム2（確定）")
+    st.markdown("### 🟥 チーム2（確定）")
     for p, role in t2:
         st.write(format_player_label(p, role))
 
-    winner = st.radio("勝ったチームは？", options=["🟥 チーム1", "🟦 チーム2"], key="winner_select")
+    winner = st.radio("勝ったチームは？", options=["🟦 チーム1", "🟥 チーム2"], key="winner_select")
     if st.button("結果を記録"):
         t1, t2 = st.session_state.get("confirmed_teams", ([], []))
-        if winner == "🟥 チーム1":
+        if winner == "🟦 チーム1":
             winners, losers = t1, t2
         else:
             winners, losers = t2, t1
@@ -349,11 +349,11 @@ if st.session_state.get("confirmed_teams") and st.session_state.get("last_teams"
 elif st.session_state.get("last_teams"):
     if st.button("チームを確定"):
         st.session_state.confirmed_teams = st.session_state.get("last_teams", None)
-        st.markdown("### 🟥 チーム1（確定）")
+        st.markdown("### 🟦 チーム1（確定）")
         t1, t2 = st.session_state.confirmed_teams
         for p, role in t1:
             st.write(format_player_label(p, role))
-        st.markdown("### 🟦 チーム2（確定）")
+        st.markdown("### 🟥 チーム2（確定）")
         for p, role in t2:
             st.write(format_player_label(p, role))
         st.success("このチーム構成を確定しました")
@@ -365,11 +365,11 @@ if len(selected_names) == 10 and st.button("チーム分け実行"):
         t1, t2, matchup_gap = optimize_matchup_gap(t1, t2)
         st.session_state.last_teams = (t1, t2)
 
-        st.markdown("### 🟥 チーム1")
+        st.markdown("### 🟦 チーム1")
         for p, role in t1:
             st.write(format_player_label(p, role))
 
-        st.markdown("### 🟦 チーム2")
+        st.markdown("### 🟥 チーム2")
         for p, role in t2:
             st.write(format_player_label(p, role))
 
@@ -382,8 +382,8 @@ if len(selected_names) == 10 and st.button("チーム分け実行"):
 
         st.markdown("## チームスコア比較（参考）")
         col1, col2 = st.columns(2)
-        col1.metric("🟥 チーム1 総合ランク", team1_score)
-        col2.metric("🟦 チーム2 総合ランク", team2_score)
+        col1.metric("🟦 チーム1 総合ランク", team1_score)
+        col2.metric("🟥 チーム2 総合ランク", team2_score)
 
         st.markdown(f"### 平均ティア差（対面ごと）: `{matchup_gap:.2f}`")
 
